@@ -1,112 +1,111 @@
-.login-container {
+@import '../../config/design-tokens.scss';
+
+.login {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-}
+  padding: $spacing-lg;
 
-.login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  max-width: 400px;
-  width: 100%;
-}
-
-h1 {
-  margin: 0 0 8px 0;
-  color: #333;
-  font-size: 28px;
-  text-align: center;
-}
-
-.subtitle {
-  color: #666;
-  text-align: center;
-  margin: 0 0 32px 0;
-}
-
-.form-group {
-  margin-bottom: 24px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-}
-
-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-
-  &:focus {
-    outline: none;
-    border-color: #667eea;
+  &__container {
+    width: 100%;
+    max-width: 450px;
   }
 
-  &:disabled {
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-  }
-}
-
-.error-message {
-  background-color: #fee;
-  color: #c33;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-.login-button {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  &__card {
+    padding: $spacing-xl;
   }
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-lg;
   }
-}
 
-.demo-info {
-  margin-top: 24px;
-  padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #666;
+  &__title {
+    font-size: $font-size-xxl;
+    margin-bottom: $spacing-sm;
+  }
 
-  p {
-    margin: 4px 0;
+  &__subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
 
-    &:first-child {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 8px;
+  &__content {
+    padding: $spacing-md 0;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__field {
+    width: 100%;
+  }
+
+  &__input {
+    width: 100%;
+  }
+
+  &__error {
+    margin-bottom: $spacing-md;
+  }
+
+  &__error-card {
+    background-color: #fee;
+    color: #c33;
+    padding: $spacing-md;
+    border-left: 4px solid #c33;
+  }
+
+  &__button {
+    width: 100%;
+    padding: $spacing-md 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+
+    &:disabled {
+      opacity: 0.6;
     }
+  }
+
+  &__button-text {
+    display: block;
+  }
+
+  &__button-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+  }
+
+  &__spinner {
+    display: inline-block;
+  }
+
+  &__footer {
+    margin-top: $spacing-lg;
+    padding: 0;
+  }
+
+  &__demo-info {
+    padding: $spacing-md;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: $font-size-sm;
+    color: #666;
+  }
+
+  &__demo-title {
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 $spacing-sm 0;
+  }
+
+  &__demo-text {
+    margin: $spacing-xs 0;
   }
 }
