@@ -1,0 +1,13 @@
+<div class="app">
+  <mat-toolbar color="primary" class="app__toolbar">
+    <span class="app__title" routerLink="/">{{ title() }}</span>
+    <span class="app__spacer"></span>
+    <button mat-button routerLink="/" class="app__nav-link">Home</button>
+    <button mat-button routerLink="/search" class="app__nav-link">Search</button>
+    <button mat-button routerLink="/dashboard" class="app__nav-link">Dashboard</button>
+  </mat-toolbar>
+  
+  <main class="app__main">
+    <router-outlet />
+  </main>
+</div>

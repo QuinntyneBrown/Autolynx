@@ -1,0 +1,41 @@
+@import '../../config/design-tokens.scss';
+
+.home {
+  padding: $spacing-lg;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+
+  &__hero {
+    margin-bottom: $spacing-xxl;
+  }
+
+  &__hero-card {
+    text-align: center;
+    padding: $spacing-xl;
+  }
+
+  &__title {
+    font-size: $font-size-xxl;
+    margin-bottom: $spacing-md;
+  }
+
+  &__description {
+    font-size: $font-size-lg;
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: $spacing-lg;
+  }
+
+  &__cta-button {
+    margin: $spacing-sm;
+  }
+
+  &__features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $spacing-lg;
+  }
+
+  &__feature-card {
+    padding: $spacing-lg;
+  }
+}
