@@ -1,9 +1,10 @@
 // Copyright (c) Quinntyne Brown. All Rights Reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using Autolynx.Core.Options;
 using Azure;
 using Azure.AI.OpenAI;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using OpenAI.Chat;
 
 namespace Autolynx.Core.Services;
@@ -12,12 +13,16 @@ public class OpenAIClientWrapper : IOpenAIClientWrapper
 {
     private readonly AzureOpenAIClient _client;
 
-    public OpenAIClientWrapper(IConfiguration configuration)
+    public OpenAIClientWrapper(IOptions<AzureOpenAIOptions> options)
     {
-        var endpoint = configuration["AzureOpenAI:Endpoint"] ?? throw new InvalidOperationException("AzureOpenAI:Endpoint is not configured");
-        var apiKey = configuration["AzureOpenAI:ApiKey"] ?? throw new InvalidOperationException("AzureOpenAI:ApiKey is not configured");
+        var azureOptions = options.Value;
+        
+        if (string.IsNullOrEmpty(azureOptions.Endpoint))
+            throw new InvalidOperationException("AzureOpenAIOptions:Endpoint is not configured");
+        if (string.IsNullOrEmpty(azureOptions.ApiKey))
+            throw new InvalidOperationException("AzureOpenAIOptions:ApiKey is not configured");
 
-        _client = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
+        _client = new AzureOpenAIClient(new Uri(azureOptions.Endpoint), new AzureKeyCredential(azureOptions.ApiKey));
     }
 
     public async Task<string> GetChatCompletionAsync(string deploymentName, string prompt, CancellationToken cancellationToken = default)

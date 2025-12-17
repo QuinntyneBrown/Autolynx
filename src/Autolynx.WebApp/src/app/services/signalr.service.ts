@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { VehicleSearchResultDto } from '../models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class SignalRService {
 
     this.connectionState.set('connecting');
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5000/hubs/vehicle-search') // TODO: Move to environment config
+      .withUrl(environment.hubUrl)
       .withAutomaticReconnect()
       .build();
 

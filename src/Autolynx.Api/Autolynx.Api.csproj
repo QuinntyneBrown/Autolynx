@@ -7,6 +7,7 @@
     <NoWarn>1998,4014,,SA1101,SA1600,,SA1200,SA1633,1591,SA1309</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <InvariantGlobalization>false</InvariantGlobalization>
+    <UserSecretsId>cc70c6aa-de76-4269-8155-7e0ab74c0f5f</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Autolynx.Api.IntegrationTests" />
