@@ -1,0 +1,72 @@
+<div class="login">
+  <div class="login__container">
+    <mat-card class="login__card">
+      <mat-card-header class="login__header">
+        <mat-card-title class="login__title">Login</mat-card-title>
+        <mat-card-subtitle class="login__subtitle">Sign in to access your account</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content class="login__content">
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login__form">
+          <mat-form-field appearance="outline" class="login__field">
+            <mat-label>Username</mat-label>
+            <input
+              matInput
+              type="text"
+              id="username"
+              name="username"
+              [(ngModel)]="username"
+              required
+              placeholder="Enter your username"
+              [disabled]="isLoading"
+              class="login__input"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="login__field">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              type="password"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              placeholder="Enter your password"
+              [disabled]="isLoading"
+              class="login__input"
+            />
+          </mat-form-field>
+
+          <div class="login__error" *ngIf="errorMessage">
+            <mat-card class="login__error-card">
+              {{ errorMessage }}
+            </mat-card>
+          </div>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="login__button"
+            [disabled]="!loginForm.valid || isLoading"
+          >
+            <span *ngIf="!isLoading" class="login__button-text">Login</span>
+            <span *ngIf="isLoading" class="login__button-loading">
+              <mat-spinner diameter="20" class="login__spinner"></mat-spinner>
+              Logging in...
+            </span>
+          </button>
+        </form>
+      </mat-card-content>
+
+      <mat-card-footer class="login__footer">
+        <div class="login__demo-info">
+          <p class="login__demo-title"><strong>Demo Credentials:</strong></p>
+          <p class="login__demo-text">Admin: username = "admin", any password</p>
+          <p class="login__demo-text">User: any username, any password</p>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+</div>

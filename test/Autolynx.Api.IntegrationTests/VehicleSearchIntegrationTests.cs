@@ -3,6 +3,8 @@
 
 using System.Net;
 using System.Net.Http.Json;
+using Autolynx.Api.Controllers;
+using Autolynx.Core.Features.Authentication;
 using Autolynx.Core.Models;
 using Autolynx.Core.Services;
 using Autolynx.Testing.Fakes;
@@ -30,11 +32,22 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
         });
     }
 
+    private async Task<HttpClient> CreateAuthenticatedClient()
+    {
+        var client = _factory.CreateClient();
+        var loginRequest = new LoginRequest { Username = "testuser", Password = "testpassword" };
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.NotNull(loginResult);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
+        return client;
+    }
+
     [Fact]
     public async Task SearchVehicles_ShouldReturnOk_WithValidCriteria()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Toyota",
@@ -59,7 +72,7 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
     public async Task SearchVehicles_ShouldReturnResults_WithMinimalCriteria()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Honda"
@@ -78,7 +91,7 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
     public async Task SearchVehicles_ShouldIncludeRequiredFields_InResults()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Toyota",
