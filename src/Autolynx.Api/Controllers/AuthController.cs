@@ -28,6 +28,8 @@ public class AuthController : ControllerBase
 
     /// <summary>
     /// Authenticates a user and returns a JWT token
+    /// NOTE: This is a demonstration implementation. In production, replace with proper user
+    /// authentication against a database with hashed passwords and secure credential validation.
     /// </summary>
     /// <param name="request">The login request containing username and password</param>
     /// <returns>JWT token and user information</returns>

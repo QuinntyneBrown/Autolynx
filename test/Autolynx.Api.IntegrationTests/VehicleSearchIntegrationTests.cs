@@ -31,19 +31,22 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
         });
     }
 
-    [Fact]
-    public async Task SearchVehicles_ShouldReturnOk_WithValidCriteria()
+    private async Task<HttpClient> CreateAuthenticatedClient()
     {
-        // Arrange
         var client = _factory.CreateClient();
-        
-        // Get authentication token
         var loginRequest = new LoginRequest { Username = "testuser", Password = "testpassword" };
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
         var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull(loginResult);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-        
+        return client;
+    }
+
+    [Fact]
+    public async Task SearchVehicles_ShouldReturnOk_WithValidCriteria()
+    {
+        // Arrange
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Toyota",
@@ -68,15 +71,7 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
     public async Task SearchVehicles_ShouldReturnResults_WithMinimalCriteria()
     {
         // Arrange
-        var client = _factory.CreateClient();
-        
-        // Get authentication token
-        var loginRequest = new LoginRequest { Username = "testuser", Password = "testpassword" };
-        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
-        Assert.NotNull(loginResult);
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-        
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Honda"
@@ -95,15 +90,7 @@ public class VehicleSearchIntegrationTests : IClassFixture<WebApplicationFactory
     public async Task SearchVehicles_ShouldIncludeRequiredFields_InResults()
     {
         // Arrange
-        var client = _factory.CreateClient();
-        
-        // Get authentication token
-        var loginRequest = new LoginRequest { Username = "testuser", Password = "testpassword" };
-        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
-        Assert.NotNull(loginResult);
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-        
+        var client = await CreateAuthenticatedClient();
         var criteria = new VehicleSearchCriteria
         {
             Make = "Toyota",
