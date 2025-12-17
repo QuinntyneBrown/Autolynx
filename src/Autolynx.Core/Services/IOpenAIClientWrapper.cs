@@ -6,4 +6,5 @@ namespace Autolynx.Core.Services;
 public interface IOpenAIClientWrapper
 {
     Task<string> GetChatCompletionAsync(string deploymentName, string prompt, CancellationToken cancellationToken = default);
+    Task<string> GetChatCompletionWithGroundingAsync(string deploymentName, string prompt, CancellationToken cancellationToken = default);
 }

@@ -1,13 +1,15 @@
 # Autolynx
 
-Autolynx is an intelligent vehicle search platform that helps users find vehicles for sale across multiple automotive marketplaces using the Bing Search API.
+Autolynx is an intelligent vehicle search platform that leverages Azure OpenAI with Grounding (Bing Search integration) to find and analyze vehicles for sale across multiple automotive marketplaces.
 
 ## Features
 
-- **Web Search Integration**: Uses Microsoft Bing Search API to find vehicles across popular platforms like Cars.com, AutoTrader, CarGurus, Carfax, Edmunds, and more
+- **AI-Powered Search with Grounding**: Uses Azure OpenAI Service with web search grounding to find current vehicle listings
+- **Real-time Web Data**: Grounded responses using Bing Search integration for up-to-date listings from Cars.com, AutoTrader, CarGurus, Carfax, Edmunds, and more
+- **Intelligent Data Extraction**: AI interprets unstructured web content and extracts structured vehicle data
 - **Flexible Search Criteria**: Search by make, model, year range, price range, location (country, province, city, postal code), transmission type, and fuel type
 - **Real-time Updates**: SignalR integration provides live search progress and results
-- **Intelligent Data Extraction**: Automatically extracts vehicle details (price, mileage, year) from search results
+- **Price Intelligence**: AI analyzes market data to determine if listings are good deals
 - **Comprehensive Results**: Includes vehicle details, pricing, dealer information, and direct links to live listings
 
 ## Architecture
@@ -16,9 +18,9 @@ Autolynx is an intelligent vehicle search platform that helps users find vehicle
 
 - **Autolynx.Core**: Domain models, services, MediatR CQRS handlers, and business logic
   - Features: Vehicle search using MediatR queries
-  - Services: Bing Search integration, vehicle data extraction
+  - Services: Azure OpenAI integration with grounding, intelligent data extraction
   - Models: DTOs for vehicle search criteria and results
-  - Options: Strongly-typed configuration classes (BingSearchOptions, CorsOptions)
+  - Options: Strongly-typed configuration classes (AzureOpenAIOptions, CorsOptions)
   
 - **Autolynx.Api**: ASP.NET Core Web API (.NET 9.0)
   - RESTful endpoints for vehicle search
@@ -46,21 +48,25 @@ Autolynx is an intelligent vehicle search platform that helps users find vehicle
 - **CQRS**: MediatR queries and handlers for separation of concerns
 - **Options Pattern**: Strongly-typed configuration using IOptions<T>
 - **Dependency Injection**: All services registered via ASP.NET Core DI
-- **Repository Pattern**: Service interfaces abstract external dependencies
-- **HttpClient Factory**: Managed HTTP clients for Bing Search API
+- **Wrapper Pattern**: OpenAI client abstraction for testability
+- **Grounding Pattern**: AI responses grounded in real-time web search data
 
 ## Prerequisites
 
 - .NET 9.0 SDK or later
 - Node.js 18+ and npm (for Angular frontend)
-- Microsoft Bing Search API key (Free tier available: 1,000 searches/month)
+- Azure OpenAI Service resource with a deployed model (GPT-3.5-Turbo or GPT-4 recommended)
+- Azure subscription
 
-## Getting Your Bing Search API Key
+## Getting Your Azure OpenAI Credentials
 
 1. Go to [Azure Portal](https://portal.azure.com)
-2. Create a "Bing Search v7" resource
-3. Copy the API key from "Keys and Endpoint"
-4. See [detailed integration guide](docs/BING-SEARCH-INTEGRATION.md) for step-by-step instructions
+2. Create an "Azure OpenAI" resource
+3. Deploy a model (GPT-3.5-Turbo or GPT-4)
+4. Copy the Endpoint, API Key, and Deployment Name
+5. See [detailed integration guide](docs/AZURE-OPENAI-GROUNDING.md) for step-by-step instructions
+
+**Note**: Grounding with Bing Search is automatically available in Azure OpenAI Service when using supported models.
 
 ## Configuration
 
@@ -70,11 +76,10 @@ Update `src/Autolynx.Api/appsettings.json`:
 
 ```json
 {
-  "BingSearchOptions": {
-    "ApiKey": "your-bing-search-api-key-here",
-    "Endpoint": "https://api.bing.microsoft.com/v7.0/search",
-    "ResultCount": 10,
-    "Market": "en-US"
+  "AzureOpenAIOptions": {
+    "Endpoint": "https://your-resource.openai.azure.com/",
+    "ApiKey": "your-api-key-here",
+    "DeploymentName": "your-deployment-name"
   },
   "CorsOptions": {
     "AllowedOrigins": [
@@ -86,7 +91,7 @@ Update `src/Autolynx.Api/appsettings.json`:
 
 ### CLI Configuration
 
-Update `src/Autolynx.Cli/appsettings.json` with the same `BingSearchOptions`.
+Update `src/Autolynx.Cli/appsettings.json` with the same `AzureOpenAIOptions`.
 
 ### Frontend Configuration
 
@@ -296,15 +301,26 @@ The workflow runs on every pull request to the main branch.
 1. User submits search criteria through the Angular frontend or CLI
 2. Request is sent to the API which creates a `SearchVehiclesQuery`
 3. MediatR dispatches the query to `SearchVehiclesQueryHandler`
-4. Handler calls `VehicleSearchService` which builds a Bing search query
-5. `BingSearchService` makes HTTP request to Bing Search API
-6. Results are parsed and vehicle data is extracted using regex patterns
-7. Results are returned to the client (or displayed in CLI table)
-8. SignalR hub broadcasts real-time updates to connected clients
+4. Handler calls `VehicleSearchService` which builds a detailed prompt
+5. `OpenAIClientWrapper` sends the prompt to Azure OpenAI with grounding enabled
+6. Azure OpenAI internally searches the web using Bing Search
+7. The AI model analyzes search results and extracts vehicle data
+8. Structured JSON response is parsed and returned to the client
+9. Results are displayed in the frontend or CLI table
+10. SignalR hub broadcasts real-time updates to connected clients
+
+## Key Advantages
+
+- **AI-Powered Understanding**: GPT models interpret unstructured web content
+- **Contextual Analysis**: Determines if prices are competitive based on market data
+- **Flexible Queries**: Natural language prompts instead of rigid search syntax
+- **Consistent Output**: AI ensures well-formatted, structured JSON responses
+- **Real-time Data**: Grounding provides access to current web information
+- **Source Attribution**: Responses include citations to original sources
 
 ## Additional Documentation
 
-- [Bing Search API Integration Guide](docs/BING-SEARCH-INTEGRATION.md) - Comprehensive guide with tutorials and example implementations for testing without requiring actual Azure OpenAI access
+- [Azure OpenAI with Grounding Integration Guide](docs/AZURE-OPENAI-GROUNDING.md) - Comprehensive guide with tutorials, examples, and best practices
 
 ## Design Patterns
 

@@ -4,33 +4,43 @@
 using System.Text;
 using System.Text.Json;
 using Autolynx.Core.Models;
+using Autolynx.Core.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Autolynx.Core.Services;
 
 public class VehicleSearchService : IVehicleSearchService
 {
-    private readonly IBingSearchService _bingSearchService;
+    private readonly IOpenAIClientWrapper _openAIClient;
     private readonly ILogger<VehicleSearchService> _logger;
+    private readonly string _deploymentName;
 
     public VehicleSearchService(
-        IBingSearchService bingSearchService,
+        IOpenAIClientWrapper openAIClient,
+        IOptions<AzureOpenAIOptions> options,
         ILogger<VehicleSearchService> logger)
     {
-        _bingSearchService = bingSearchService ?? throw new ArgumentNullException(nameof(bingSearchService));
+        _openAIClient = openAIClient ?? throw new ArgumentNullException(nameof(openAIClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        
+        var azureOptions = options.Value;
+        if (string.IsNullOrEmpty(azureOptions.DeploymentName))
+            throw new InvalidOperationException("AzureOpenAIOptions:DeploymentName is not configured");
+            
+        _deploymentName = azureOptions.DeploymentName;
     }
 
     public async Task<List<VehicleSearchResultDto>> SearchVehiclesAsync(VehicleSearchCriteria criteria, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Searching for vehicles with criteria: {Criteria}", JsonSerializer.Serialize(criteria));
 
-        var searchQuery = BuildBingSearchQuery(criteria);
+        var prompt = BuildSearchPrompt(criteria);
 
         try
         {
-            var response = await _bingSearchService.SearchAsync(searchQuery, cancellationToken);
-            var results = ParseBingResults(response, criteria);
+            var response = await _openAIClient.GetChatCompletionWithGroundingAsync(_deploymentName, prompt, cancellationToken);
+            var results = ParseVehicleResults(response);
 
             _logger.LogInformation("Found {Count} vehicles matching criteria", results.Count);
 
@@ -43,34 +53,53 @@ public class VehicleSearchService : IVehicleSearchService
         }
     }
 
-    private string BuildBingSearchQuery(VehicleSearchCriteria criteria)
+    private string BuildSearchPrompt(VehicleSearchCriteria criteria)
     {
-        var queryParts = new List<string>();
+        var promptBuilder = new StringBuilder();
+        promptBuilder.AppendLine("Search for vehicles for sale based on the following criteria.");
+        promptBuilder.AppendLine("Use current web search results from automotive websites like Cars.com, AutoTrader, CarGurus, Carfax, and Edmunds.");
+        promptBuilder.AppendLine();
 
-        if (!string.IsNullOrEmpty(criteria.Make))
-            queryParts.Add(criteria.Make);
+        if (!string.IsNullOrWhiteSpace(criteria.Make))
+            promptBuilder.AppendLine($"Make: {criteria.Make}");
 
-        if (!string.IsNullOrEmpty(criteria.Model))
-            queryParts.Add(criteria.Model);
+        if (!string.IsNullOrWhiteSpace(criteria.Model))
+            promptBuilder.AppendLine($"Model: {criteria.Model}");
 
-        if (criteria.YearMin.HasValue)
-            queryParts.Add(criteria.YearMin.Value.ToString());
+        if (criteria.YearMin.HasValue || criteria.YearMax.HasValue)
+            promptBuilder.AppendLine($"Year Range: {criteria.YearMin ?? 1900} - {criteria.YearMax ?? DateTime.Now.Year}");
 
-        // Add common automotive search terms
-        queryParts.Add("for sale");
+        if (criteria.PriceMin.HasValue || criteria.PriceMax.HasValue)
+            promptBuilder.AppendLine($"Price Range: ${criteria.PriceMin ?? 0:N2} - ${criteria.PriceMax ?? 999999:N2}");
+
+        if (criteria.MileageMax.HasValue)
+            promptBuilder.AppendLine($"Max Mileage: {criteria.MileageMax} miles");
 
         var location = BuildLocationString(criteria);
         if (!string.IsNullOrEmpty(location))
-            queryParts.Add(location);
+            promptBuilder.AppendLine($"Location: {location}");
 
-        // Add site restrictions for popular automotive sites
-        var siteRestrictions = new[] 
-        { 
-            "site:cars.com OR site:autotrader.com OR site:cargurus.com OR site:carfax.com OR site:edmunds.com"
-        };
-        queryParts.Add($"({string.Join(" OR ", siteRestrictions)})");
+        if (!string.IsNullOrWhiteSpace(criteria.Transmission))
+            promptBuilder.AppendLine($"Transmission: {criteria.Transmission}");
 
-        return string.Join(" ", queryParts);
+        if (!string.IsNullOrWhiteSpace(criteria.FuelType))
+            promptBuilder.AppendLine($"Fuel Type: {criteria.FuelType}");
+
+        promptBuilder.AppendLine();
+        promptBuilder.AppendLine("For each vehicle found, provide the following information in JSON format:");
+        promptBuilder.AppendLine("- Make, Model, Year, Trim");
+        promptBuilder.AppendLine("- Mileage, Color, Transmission, FuelType");
+        promptBuilder.AppendLine("- Price (as a number)");
+        promptBuilder.AppendLine("- IsGoodPrice (boolean indicating if this is a good deal based on market value)");
+        promptBuilder.AppendLine("- ListingUrl (the actual URL to view the listing)");
+        promptBuilder.AppendLine("- DealerName, SellerPhone, SellerEmail (if available)");
+        promptBuilder.AppendLine("- Location (full location string)");
+        promptBuilder.AppendLine("- Source (website name)");
+        promptBuilder.AppendLine("- VIN (if available)");
+        promptBuilder.AppendLine();
+        promptBuilder.AppendLine("Return results as a JSON array of vehicle objects. Ensure all URLs are actual, working links from the search results.");
+
+        return promptBuilder.ToString();
     }
 
     private string BuildLocationString(VehicleSearchCriteria criteria)
@@ -89,106 +118,32 @@ public class VehicleSearchService : IVehicleSearchService
         return string.Join(", ", parts);
     }
 
-    private List<VehicleSearchResultDto> ParseBingResults(string response, VehicleSearchCriteria criteria)
+    private List<VehicleSearchResultDto> ParseVehicleResults(string responseContent)
     {
         try
         {
-            var bingResponse = JsonSerializer.Deserialize<BingSearchResponse>(response, new JsonSerializerOptions
+            // Try to extract JSON array from the response
+            var jsonStart = responseContent.IndexOf('[');
+            var jsonEnd = responseContent.LastIndexOf(']');
+
+            if (jsonStart == -1 || jsonEnd == -1)
+            {
+                _logger.LogWarning("No JSON array found in response");
+                return new List<VehicleSearchResultDto>();
+            }
+
+            var jsonContent = responseContent.Substring(jsonStart, jsonEnd - jsonStart + 1);
+            var results = JsonSerializer.Deserialize<List<VehicleSearchResultDto>>(jsonContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            if (bingResponse?.WebPages?.Value == null || !bingResponse.WebPages.Value.Any())
-            {
-                _logger.LogWarning("No web pages found in Bing search response");
-                return new List<VehicleSearchResultDto>();
-            }
-
-            var results = new List<VehicleSearchResultDto>();
-
-            foreach (var page in bingResponse.WebPages.Value)
-            {
-                // Extract vehicle information from search results
-                var vehicle = new VehicleSearchResultDto
-                {
-                    Make = criteria.Make,
-                    Model = criteria.Model,
-                    Year = ExtractYear(page.Name, page.Snippet, criteria),
-                    ListingUrl = page.Url,
-                    Source = ExtractSource(page.DisplayUrl),
-                    Location = ExtractLocation(page.Snippet, criteria),
-                    Price = ExtractPrice(page.Snippet),
-                    Mileage = ExtractMileage(page.Snippet),
-                    IsGoodPrice = false // TODO: Implement price analysis logic
-                };
-
-                results.Add(vehicle);
-            }
-
-            return results;
+            return results ?? new List<VehicleSearchResultDto>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error parsing Bing search results");
+            _logger.LogError(ex, "Error parsing vehicle search results from response: {Response}", responseContent);
             return new List<VehicleSearchResultDto>();
         }
-    }
-
-    private int ExtractYear(string title, string snippet, VehicleSearchCriteria criteria)
-    {
-        // Try to extract year from title or snippet
-        var text = $"{title} {snippet}";
-        var yearMatch = System.Text.RegularExpressions.Regex.Match(text, @"\b(19|20)\d{2}\b");
-        
-        if (yearMatch.Success && int.TryParse(yearMatch.Value, out var year))
-            return year;
-
-        // Default to criteria year if available
-        return criteria.YearMin ?? DateTime.Now.Year;
-    }
-
-    private string ExtractSource(string displayUrl)
-    {
-        var domain = displayUrl.Split('/')[0].Replace("www.", "");
-        return domain;
-    }
-
-    private string? ExtractLocation(string snippet, VehicleSearchCriteria criteria)
-    {
-        // Return criteria location if available
-        if (!string.IsNullOrEmpty(criteria.City))
-            return $"{criteria.City}, {criteria.Province ?? criteria.Country}";
-
-        return null;
-    }
-
-    private decimal ExtractPrice(string snippet)
-    {
-        // Try to extract price from snippet
-        var priceMatch = System.Text.RegularExpressions.Regex.Match(snippet, @"\$([\d,]+)");
-        
-        if (priceMatch.Success)
-        {
-            var priceStr = priceMatch.Groups[1].Value.Replace(",", "");
-            if (decimal.TryParse(priceStr, out var price))
-                return price;
-        }
-
-        return 0;
-    }
-
-    private int ExtractMileage(string snippet)
-    {
-        // Try to extract mileage from snippet
-        var mileageMatch = System.Text.RegularExpressions.Regex.Match(snippet, @"([\d,]+)\s*(miles|mi|km)");
-        
-        if (mileageMatch.Success)
-        {
-            var mileageStr = mileageMatch.Groups[1].Value.Replace(",", "");
-            if (int.TryParse(mileageStr, out var mileage))
-                return mileage;
-        }
-
-        return 0;
     }
 }

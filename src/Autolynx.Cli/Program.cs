@@ -22,7 +22,7 @@ var services = new ServiceCollection();
 services.AddLogging();
 
 // Add Options
-services.Configure<BingSearchOptions>(configuration.GetSection(nameof(BingSearchOptions)));
+services.Configure<AzureOpenAIOptions>(configuration.GetSection(nameof(AzureOpenAIOptions)));
 
 // Add Configuration
 services.AddSingleton<IConfiguration>(configuration);
@@ -31,7 +31,7 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(SearchVehiclesQuery).Assembly));
 
 // Add Core Services
-services.AddHttpClient<IBingSearchService, BingSearchService>();
+services.AddSingleton<IOpenAIClientWrapper, OpenAIClientWrapper>();
 services.AddScoped<IVehicleSearchService, VehicleSearchService>();
 
 var serviceProvider = services.BuildServiceProvider();
@@ -44,12 +44,11 @@ var criteria = new VehicleSearchCriteria
 {
     Make = "Toyota",
     Model = "Camry",
-    YearMin = 2020,
-    PriceMax = 30000
+    PostalCode = "L5A 4E6",
 };
 
 Console.WriteLine($"Searching for: {criteria.Make} {criteria.Model}");
-Console.WriteLine($"Year: {criteria.YearMin}+, Max Price: ${criteria.PriceMax:N0}\n");
+
 
 try
 {

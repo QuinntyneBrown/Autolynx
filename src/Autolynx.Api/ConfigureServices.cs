@@ -26,7 +26,7 @@ public static class ConfigureServices
         services.AddSwaggerGen();
 
         // Add Options
-        services.Configure<BingSearchOptions>(configuration.GetSection(nameof(BingSearchOptions)));
+        services.Configure<AzureOpenAIOptions>(configuration.GetSection(nameof(AzureOpenAIOptions)));
 
         // Add MediatR
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Autolynx.Core.Services.IVehicleSearchService).Assembly));
@@ -35,7 +35,7 @@ public static class ConfigureServices
         services.AddSignalR();
 
         // Add Core Services
-        services.AddHttpClient<IBingSearchService, BingSearchService>();
+        services.AddSingleton<IOpenAIClientWrapper, OpenAIClientWrapper>();
         services.AddScoped<IVehicleSearchService, VehicleSearchService>();
     }
 }
