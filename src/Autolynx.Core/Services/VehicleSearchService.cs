@@ -1,6 +1,7 @@
 // Copyright (c) Quinntyne Brown. All Rights Reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System.Text;
 using System.Text.Json;
 using Autolynx.Core.Models;
 using Azure.AI.OpenAI;
@@ -50,7 +51,7 @@ public class VehicleSearchService : IVehicleSearchService
 
     private string BuildSearchPrompt(VehicleSearchCriteria criteria)
     {
-        var promptBuilder = new System.Text.StringBuilder();
+        var promptBuilder = new StringBuilder();
         promptBuilder.AppendLine("Search for vehicles for sale based on the following criteria:");
         promptBuilder.AppendLine("Please search popular automotive websites like Car Gurus, Clutch, AutoTrader, Kijiji, and other relevant platforms.");
         promptBuilder.AppendLine();
