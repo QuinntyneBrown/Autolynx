@@ -1,59 +1,172 @@
-# AutolynxWebApp
+# Autolynx Web Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.3.
+An Angular Single Page Application for searching vehicles with real-time updates.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Home Page**: Landing page with navigation to main features
+- **Vehicle Search**: Advanced search form with multiple criteria (make, model, year, price, mileage, location)
+- **Search Results**: Display results with deep linking support - search criteria is preserved in URL query parameters
+- **Dashboard**: Real-time vehicle search updates via SignalR integration
+- **Material Design**: Clean, modern UI using Angular Material
+- **Responsive Layout**: Mobile-friendly design with consistent spacing using design tokens
+- **BEM Naming Convention**: All styles follow Block Element Modifier methodology
 
-```bash
-ng serve
+## Technology Stack
+
+- **Angular 21**: Latest version of Angular framework
+- **Angular Material**: Material Design component library
+- **TypeScript**: Type-safe development
+- **SCSS**: Styling with design tokens
+- **SignalR**: Real-time communication with backend
+- **Playwright**: End-to-end testing framework
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── components/     # Reusable components (barrel exported)
+│   ├── config/         # Design tokens and configuration
+│   ├── models/         # TypeScript interfaces and DTOs (barrel exported)
+│   ├── pages/          # Page components (barrel exported)
+│   │   ├── home/
+│   │   ├── vehicle-search/
+│   │   ├── vehicle-search-results/
+│   │   └── dashboard/
+│   ├── services/       # API and SignalR services (barrel exported)
+│   ├── app.config.ts   # Application configuration
+│   ├── app.routes.ts   # Route definitions
+│   └── app.ts          # Root component
+├── index.html
+├── main.ts
+└── styles.scss
+e2e/                    # Playwright end-to-end tests
+├── home.spec.ts
+├── vehicle-search.spec.ts
+├── vehicle-search-results.spec.ts
+└── dashboard.spec.ts
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Getting Started
 
-## Code scaffolding
+### Prerequisites
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js (v20 or higher)
+- npm (v10 or higher)
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Installation
 
 ```bash
-ng generate --help
+cd src/Autolynx.WebApp
+npm install
 ```
 
-## Building
-
-To build the project run:
+### Development Server
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Navigate to `http://localhost:4200/`. The application will automatically reload when you change any source files.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+The build artifacts will be stored in the `dist/` directory.
 
-For end-to-end (e2e) testing, run:
+### Running Tests
+
+#### End-to-End Tests
 
 ```bash
-ng e2e
+# Run tests in headless mode
+npm run e2e
+
+# Run tests with UI
+npm run e2e:ui
+
+# Run tests in headed browser mode
+npm run e2e:headed
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Deep Linking
 
-## Additional Resources
+The search results page supports deep linking. You can share URLs with search criteria:
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Example:
+```
+http://localhost:4200/results?make=Toyota&model=Camry&yearFrom=2020&yearTo=2024&priceFrom=15000&priceTo=30000
+```
+
+The application will parse the query parameters and display the search criteria and fetch results automatically.
+
+## Backend Requirements
+
+The application expects the following backend endpoints:
+
+- **API Base URL**: `http://localhost:5000/api`
+- **Search Endpoint**: `GET /api/vehicles/search`
+- **SignalR Hub**: `http://localhost:5000/hubs/vehicle-search`
+
+### Expected API Response Format
+
+```typescript
+interface VehicleSearchResultDto {
+  results: VehicleSearchResult[];
+  totalCount: number;
+  searchCriteria: any;
+}
+
+interface VehicleSearchResult {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  mileage: number;
+  location: string;
+  description?: string;
+  imageUrl?: string;
+  listingUrl?: string;
+  listedDate?: Date;
+}
+```
+
+### SignalR Events
+
+The dashboard subscribes to the following SignalR events:
+
+- **Event**: `VehicleSearchUpdate`
+- **Payload**: `VehicleSearchResultDto`
+
+## Design Tokens
+
+All spacing, typography, and layout values are defined in `src/app/config/design-tokens.scss` to ensure consistency across the application.
+
+## BEM Naming Convention
+
+All CSS classes follow the BEM (Block Element Modifier) naming convention:
+
+```scss
+.block__element--modifier {
+  // styles
+}
+```
+
+Example:
+```scss
+.home {
+  &__hero { }
+  &__hero-card { }
+  &__cta-button { }
+}
+```
+
+## License
+
+Copyright (c) Quinntyne Brown. All Rights Reserved.
+Licensed under the MIT License.

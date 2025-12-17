@@ -24,8 +24,8 @@ test.describe('Vehicle Search', () => {
     await page.getByLabel('Year From').fill('2020');
     await page.getByLabel('Year To').fill('2024');
     
-    // Submit form
-    await page.getByRole('button', { name: 'Search' }).click();
+    // Submit form - use more specific selector to avoid navigation button
+    await page.locator('.vehicle-search__actions button[type="submit"]').click();
     
     // Check navigation and query params
     await expect(page).toHaveURL(/\/results\?.*make=Toyota.*model=Camry/);
@@ -36,8 +36,8 @@ test.describe('Vehicle Search', () => {
     await page.getByLabel('Make').fill('Toyota');
     await page.getByLabel('Model').fill('Camry');
     
-    // Reset
-    await page.getByRole('button', { name: 'Reset' }).click();
+    // Reset - use more specific selector
+    await page.locator('.vehicle-search__actions button[type="button"]').click();
     
     // Check fields are cleared
     await expect(page.getByLabel('Make')).toHaveValue('');
