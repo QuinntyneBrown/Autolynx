@@ -233,3 +233,80 @@ Consider implementing:
 - [JWT.io](https://jwt.io/) - JWT debugger and documentation
 - [Microsoft Identity Platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
 - [ASP.NET Core Security](https://docs.microsoft.com/en-us/aspnet/core/security/)
+
+## Frontend Implementation
+
+The Angular frontend includes complete authentication functionality:
+
+### Components
+
+**Login Page** (`src/app/pages/login/`)
+- Username/password form
+- Error handling
+- Loading state
+- Demo credentials display
+
+### Services
+
+**AuthService** (`src/app/services/auth.service.ts`)
+- Login/logout functionality
+- Token management (localStorage)
+- User state management (BehaviorSubject)
+- Role checking (isAdmin, hasRole)
+- Current user observable
+
+### Security Features
+
+**Auth Interceptor** (`src/app/interceptors/auth.interceptor.ts`)
+- Automatically adds JWT token to HTTP requests
+- Adds `Authorization: Bearer {token}` header
+
+**Auth Guard** (`src/app/guards/auth.guard.ts`)
+- Protects authenticated routes
+- Redirects to login page if not authenticated
+- Preserves return URL for post-login redirect
+
+### Protected Routes
+
+The following routes require authentication:
+- `/search` - Vehicle search page
+- `/results` - Search results page
+- `/dashboard` - User dashboard
+
+### Usage Example
+
+```typescript
+// Login
+this.authService.login('username', 'password').subscribe({
+  next: () => this.router.navigate(['/dashboard']),
+  error: (err) => console.error('Login failed', err)
+});
+
+// Check authentication status
+const isLoggedIn = this.authService.isAuthenticated();
+
+// Check user role
+const isAdmin = this.authService.isAdmin();
+
+// Get current user
+this.authService.currentUser$.subscribe(user => {
+  console.log(user?.username, user?.roles);
+});
+
+// Logout
+this.authService.logout();
+```
+
+### Demo Credentials
+
+For demonstration purposes:
+- **Admin**: username = "admin", any password
+- **User**: any other username, any password
+
+### UI Features
+
+- Login/logout button in navigation
+- Current username and role display
+- Role-based UI elements
+- Automatic token inclusion in API requests
+- Session persistence via localStorage

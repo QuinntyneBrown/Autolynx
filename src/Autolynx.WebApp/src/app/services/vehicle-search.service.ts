@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { VehicleSearchCriteria, VehicleSearchResultDto } from '../models';
 import { environment } from '../../environments/environment';
@@ -12,20 +12,7 @@ export class VehicleSearchService {
 
   constructor(private http: HttpClient) {}
 
-  searchVehicles(criteria: VehicleSearchCriteria): Observable<VehicleSearchResultDto> {
-    let params = new HttpParams();
-    
-    if (criteria.make) params = params.set('make', criteria.make);
-    if (criteria.model) params = params.set('model', criteria.model);
-    if (criteria.yearFrom) params = params.set('yearFrom', criteria.yearFrom.toString());
-    if (criteria.yearTo) params = params.set('yearTo', criteria.yearTo.toString());
-    if (criteria.priceFrom) params = params.set('priceFrom', criteria.priceFrom.toString());
-    if (criteria.priceTo) params = params.set('priceTo', criteria.priceTo.toString());
-    if (criteria.mileageFrom) params = params.set('mileageFrom', criteria.mileageFrom.toString());
-    if (criteria.mileageTo) params = params.set('mileageTo', criteria.mileageTo.toString());
-    if (criteria.location) params = params.set('location', criteria.location);
-    if (criteria.radius) params = params.set('radius', criteria.radius.toString());
-
-    return this.http.get<VehicleSearchResultDto>(`${this.apiUrl}/vehicles/search`, { params });
+  searchVehicles(criteria: VehicleSearchCriteria): Observable<VehicleSearchResultDto[]> {
+    return this.http.post<VehicleSearchResultDto[]>(`${this.apiUrl}/vehicles/search`, criteria);
   }
 }

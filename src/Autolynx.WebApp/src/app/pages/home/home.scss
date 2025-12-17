@@ -39,3 +39,38 @@
     padding: $spacing-lg;
   }
 }
+
+.auth-nav {
+  background-color: #f8f9fa;
+  padding: $spacing-md;
+  margin: -#{$spacing-lg} -#{$spacing-lg} $spacing-lg -#{$spacing-lg};
+  border-bottom: 1px solid #dee2e6;
+
+  &__content {
+    max-width: $layout-max-width;
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  &__username {
+    font-weight: 500;
+    color: #333;
+  }
+
+  &__role {
+    color: #667eea;
+    font-size: 0.9em;
+  }
+
+  &__logout,
+  &__login {
+    margin-left: $spacing-sm;
+  }
+}

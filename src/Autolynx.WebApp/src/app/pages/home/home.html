@@ -1,4 +1,23 @@
 <div class="home">
+  <div class="auth-nav">
+    <div class="auth-nav__content">
+      <div class="auth-nav__user" *ngIf="authService.isAuthenticated()">
+        <span class="auth-nav__username">
+          {{ (authService.currentUser$ | async)?.username }}
+          <span class="auth-nav__role" *ngIf="authService.isAdmin()"> (Admin)</span>
+        </span>
+        <button mat-stroked-button (click)="logout()" class="auth-nav__logout">
+          Logout
+        </button>
+      </div>
+      <div class="auth-nav__user" *ngIf="!authService.isAuthenticated()">
+        <button mat-raised-button color="primary" routerLink="/login" class="auth-nav__login">
+          Login
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="home__hero">
     <mat-card class="home__hero-card">
       <mat-card-header>
