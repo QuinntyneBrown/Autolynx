@@ -38,5 +38,26 @@ public class AutolynxContext : DbContext, IAutolynxContext
         // Configure Address as owned entity
         modelBuilder.Entity<Profile>()
             .OwnsOne(p => p.Address);
+
+        // Configure Privilege-Role relationship
+        modelBuilder.Entity<Privilege>()
+            .HasOne<Role>()
+            .WithMany(r => r.Privileges)
+            .HasForeignKey(p => p.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Profile-User relationship
+        modelBuilder.Entity<Profile>()
+            .HasOne(p => p.User)
+            .WithMany(u => u.Profiles)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Message-Profile relationship
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Profile)
+            .WithMany(p => p.Messages)
+            .HasForeignKey(m => m.ProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
