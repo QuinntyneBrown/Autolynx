@@ -26,3 +26,5 @@ app.UseCors("CorsPolicy");
 app.MapHub<VehicleSearchHub>("/hubs/vehicle-search");
 
 app.Run();
+
+public partial class Program { }
