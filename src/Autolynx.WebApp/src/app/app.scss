@@ -1,0 +1,32 @@
+@import './config/design-tokens.scss';
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  &__toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__nav-link {
+    margin-left: $spacing-sm;
+  }
+
+  &__main {
+    flex: 1;
+    background-color: #f5f5f5;
+  }
+}

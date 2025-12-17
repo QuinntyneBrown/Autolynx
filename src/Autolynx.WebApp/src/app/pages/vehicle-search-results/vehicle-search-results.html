@@ -1,0 +1,94 @@
+<div class="search-results">
+  <div class="search-results__header">
+    <h1 class="search-results__title">Search Results</h1>
+    
+    @if (searchCriteria(); as criteria) {
+      <div class="search-results__criteria">
+        <h3>Search Criteria:</h3>
+        <mat-chip-set class="search-results__chips">
+          @if (criteria.make) {
+            <mat-chip>Make: {{ criteria.make }}</mat-chip>
+          }
+          @if (criteria.model) {
+            <mat-chip>Model: {{ criteria.model }}</mat-chip>
+          }
+          @if (criteria.yearFrom || criteria.yearTo) {
+            <mat-chip>Year: {{ criteria.yearFrom || 'Any' }} - {{ criteria.yearTo || 'Any' }}</mat-chip>
+          }
+          @if (criteria.priceFrom || criteria.priceTo) {
+            <mat-chip>Price: ${{ criteria.priceFrom || '0' }} - ${{ criteria.priceTo || 'Any' }}</mat-chip>
+          }
+          @if (criteria.location) {
+            <mat-chip>Location: {{ criteria.location }}</mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="search-results__loading">
+      <mat-spinner></mat-spinner>
+      <p>Searching for vehicles...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <mat-card class="search-results__error">
+      <mat-card-content>
+        <p>{{ error() }}</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (!loading() && !error()) {
+    @if (results().length === 0) {
+      <mat-card class="search-results__empty">
+        <mat-card-content>
+          <p>No vehicles found matching your search criteria.</p>
+          <p>Try adjusting your filters and search again.</p>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="search-results__count">
+        Found {{ results().length }} vehicle(s)
+      </div>
+      <div class="search-results__list">
+        @for (vehicle of results(); track vehicle.id) {
+          <mat-card class="search-results__card">
+            <mat-card-header>
+              <mat-card-title class="search-results__vehicle-title">
+                {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="search-results__vehicle-details">
+                <div class="search-results__detail">
+                  <strong>Price:</strong> {{ formatPrice(vehicle.price) }}
+                </div>
+                <div class="search-results__detail">
+                  <strong>Mileage:</strong> {{ formatMileage(vehicle.mileage) }}
+                </div>
+                <div class="search-results__detail">
+                  <strong>Location:</strong> {{ vehicle.location }}
+                </div>
+                @if (vehicle.description) {
+                  <div class="search-results__detail search-results__description">
+                    {{ vehicle.description }}
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+            @if (vehicle.listingUrl) {
+              <mat-card-actions>
+                <a [href]="vehicle.listingUrl" target="_blank" mat-button color="primary">
+                  View Listing
+                </a>
+              </mat-card-actions>
+            }
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,95 @@
+<div class="dashboard">
+  <div class="dashboard__header">
+    <h1 class="dashboard__title">Real-time Vehicle Search Dashboard</h1>
+    
+    <div class="dashboard__connection-status">
+      <mat-chip-set>
+        @if (connectionState() === 'connected') {
+          <mat-chip class="dashboard__status-chip dashboard__status-chip--connected">
+            Connected
+          </mat-chip>
+        }
+        @if (connectionState() === 'connecting') {
+          <mat-chip class="dashboard__status-chip dashboard__status-chip--connecting">
+            Connecting...
+          </mat-chip>
+        }
+        @if (connectionState() === 'disconnected') {
+          <mat-chip class="dashboard__status-chip dashboard__status-chip--disconnected">
+            Disconnected
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+  </div>
+
+  <div class="dashboard__content">
+    @if (connectionState() === 'connecting') {
+      <div class="dashboard__loading">
+        <mat-spinner></mat-spinner>
+        <p>Connecting to real-time updates...</p>
+      </div>
+    }
+
+    @if (connectionState() === 'disconnected') {
+      <mat-card class="dashboard__info">
+        <mat-card-content>
+          <p>Unable to connect to real-time updates. Please check your connection and try again.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (connectionState() === 'connected') {
+      @if (latestResults.length === 0) {
+        <mat-card class="dashboard__info">
+          <mat-card-content>
+            <p>Waiting for real-time vehicle search updates...</p>
+            <p class="dashboard__info-subtitle">
+              Updates will appear here automatically when new vehicles matching configured searches are found.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="dashboard__results">
+          <h2 class="dashboard__results-title">Latest Updates ({{ latestResults.length }})</h2>
+          <div class="dashboard__results-grid">
+            @for (vehicle of latestResults; track vehicle.id) {
+              <mat-card class="dashboard__vehicle-card">
+                <mat-card-header>
+                  <mat-card-title class="dashboard__vehicle-title">
+                    {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="dashboard__vehicle-details">
+                    <div class="dashboard__detail">
+                      <strong>Price:</strong> {{ formatPrice(vehicle.price) }}
+                    </div>
+                    <div class="dashboard__detail">
+                      <strong>Mileage:</strong> {{ formatMileage(vehicle.mileage) }}
+                    </div>
+                    <div class="dashboard__detail">
+                      <strong>Location:</strong> {{ vehicle.location }}
+                    </div>
+                    @if (vehicle.description) {
+                      <div class="dashboard__detail dashboard__description">
+                        {{ vehicle.description }}
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+                @if (vehicle.listingUrl) {
+                  <mat-card-actions>
+                    <a [href]="vehicle.listingUrl" target="_blank" mat-button color="primary">
+                      View Listing
+                    </a>
+                  </mat-card-actions>
+                }
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

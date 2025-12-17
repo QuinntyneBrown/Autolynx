@@ -1,0 +1,102 @@
+@import '../../config/design-tokens.scss';
+
+.dashboard {
+  padding: $spacing-lg;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-size-xxl;
+  }
+
+  &__connection-status {
+    display: flex;
+    align-items: center;
+  }
+
+  &__status-chip {
+    &--connected {
+      background-color: #4caf50 !important;
+      color: white !important;
+    }
+
+    &--connecting {
+      background-color: #ff9800 !important;
+      color: white !important;
+    }
+
+    &--disconnected {
+      background-color: #f44336 !important;
+      color: white !important;
+    }
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xxl;
+    gap: $spacing-md;
+  }
+
+  &__info {
+    text-align: center;
+    padding: $spacing-xl;
+    margin: $spacing-xl 0;
+  }
+
+  &__info-subtitle {
+    margin-top: $spacing-md;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__results {
+    margin-top: $spacing-lg;
+  }
+
+  &__results-title {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__results-grid {
+    display: grid;
+    gap: $spacing-lg;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  &__vehicle-card {
+    padding: $spacing-md;
+  }
+
+  &__vehicle-title {
+    font-size: $font-size-lg;
+  }
+
+  &__vehicle-details {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__detail {
+    font-size: $font-size-md;
+  }
+
+  &__description {
+    margin-top: $spacing-sm;
+    padding-top: $spacing-sm;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    color: rgba(0, 0, 0, 0.7);
+  }
+}

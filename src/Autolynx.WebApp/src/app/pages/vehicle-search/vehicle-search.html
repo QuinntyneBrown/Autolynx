@@ -1,0 +1,75 @@
+<div class="vehicle-search">
+  <mat-card class="vehicle-search__card">
+    <mat-card-header>
+      <mat-card-title class="vehicle-search__title">Search for Vehicles</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="vehicle-search__form" (ngSubmit)="onSearch()">
+        <div class="vehicle-search__row">
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Make</mat-label>
+            <input matInput [(ngModel)]="searchCriteria.make" name="make" placeholder="e.g., Toyota">
+          </mat-form-field>
+
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Model</mat-label>
+            <input matInput [(ngModel)]="searchCriteria.model" name="model" placeholder="e.g., Camry">
+          </mat-form-field>
+        </div>
+
+        <div class="vehicle-search__row">
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Year From</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.yearFrom" name="yearFrom" placeholder="2020">
+          </mat-form-field>
+
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Year To</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.yearTo" name="yearTo" placeholder="2024">
+          </mat-form-field>
+        </div>
+
+        <div class="vehicle-search__row">
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Price From ($)</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.priceFrom" name="priceFrom" placeholder="10000">
+          </mat-form-field>
+
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Price To ($)</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.priceTo" name="priceTo" placeholder="50000">
+          </mat-form-field>
+        </div>
+
+        <div class="vehicle-search__row">
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Mileage From</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.mileageFrom" name="mileageFrom" placeholder="0">
+          </mat-form-field>
+
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Mileage To</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.mileageTo" name="mileageTo" placeholder="100000">
+          </mat-form-field>
+        </div>
+
+        <div class="vehicle-search__row">
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Location</mat-label>
+            <input matInput [(ngModel)]="searchCriteria.location" name="location" placeholder="City or ZIP">
+          </mat-form-field>
+
+          <mat-form-field class="vehicle-search__field">
+            <mat-label>Radius (miles)</mat-label>
+            <input matInput type="number" [(ngModel)]="searchCriteria.radius" name="radius" placeholder="25">
+          </mat-form-field>
+        </div>
+
+        <div class="vehicle-search__actions">
+          <button mat-raised-button color="primary" type="submit">Search</button>
+          <button mat-raised-button type="button" (click)="onReset()">Reset</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

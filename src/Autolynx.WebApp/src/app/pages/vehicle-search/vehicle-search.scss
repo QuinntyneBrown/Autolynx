@@ -1,0 +1,39 @@
+@import '../../config/design-tokens.scss';
+
+.vehicle-search {
+  padding: $spacing-lg;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+
+  &__card {
+    padding: $spacing-lg;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-md;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-md;
+  }
+
+  &__field {
+    width: 100%;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: flex-end;
+    margin-top: $spacing-lg;
+  }
+}
