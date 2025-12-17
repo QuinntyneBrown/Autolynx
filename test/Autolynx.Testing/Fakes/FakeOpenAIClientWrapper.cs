@@ -68,4 +68,11 @@ public class FakeOpenAIClientWrapper : IOpenAIClientWrapper
         var jsonResponse = JsonSerializer.Serialize(_fakeResults);
         return Task.FromResult(jsonResponse);
     }
+
+    public Task<string> GetChatCompletionWithGroundingAsync(string deploymentName, string prompt, CancellationToken cancellationToken = default)
+    {
+        // For testing, grounding behaves the same as regular chat completion
+        var jsonResponse = JsonSerializer.Serialize(_fakeResults);
+        return Task.FromResult(jsonResponse);
+    }
 }

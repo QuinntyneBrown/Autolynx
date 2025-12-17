@@ -52,10 +52,12 @@ public class OpenAIClientWrapper : IOpenAIClientWrapper
             new UserChatMessage(prompt)
         };
 
+
         var options = new OpenAI.Chat.ChatCompletionOptions
         {
             Temperature = 0.7f,
-            MaxOutputTokenCount = 4000
+            MaxOutputTokenCount = 4000,
+
         };
 
         // Enable grounding with Bing Search (Azure OpenAI on your data feature)

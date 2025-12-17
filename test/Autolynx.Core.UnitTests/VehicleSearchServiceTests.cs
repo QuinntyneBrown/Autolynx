@@ -2,10 +2,11 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using Autolynx.Core.Models;
+using Autolynx.Core.Options;
 using Autolynx.Core.Services;
 using Autolynx.Testing.Fakes;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -14,13 +15,17 @@ namespace Autolynx.Core.UnitTests;
 public class VehicleSearchServiceTests
 {
     private readonly Mock<ILogger<VehicleSearchService>> _loggerMock;
-    private readonly Mock<IConfiguration> _configurationMock;
+    private readonly IOptions<AzureOpenAIOptions> _options;
 
     public VehicleSearchServiceTests()
     {
         _loggerMock = new Mock<ILogger<VehicleSearchService>>();
-        _configurationMock = new Mock<IConfiguration>();
-        _configurationMock.Setup(c => c["AzureOpenAI:DeploymentName"]).Returns("test-deployment");
+        _options = Microsoft.Extensions.Options.Options.Create(new AzureOpenAIOptions
+        {
+            Endpoint = "https://test.openai.azure.com/",
+            ApiKey = "test-key",
+            DeploymentName = "test-deployment"
+        });
     }
 
     [Fact]
@@ -28,7 +33,7 @@ public class VehicleSearchServiceTests
     {
         // Arrange
         var fakeClient = new FakeOpenAIClientWrapper();
-        var service = new VehicleSearchService(fakeClient, _configurationMock.Object, _loggerMock.Object);
+        var service = new VehicleSearchService(fakeClient, _options, _loggerMock.Object);
         var criteria = new VehicleSearchCriteria
         {
             Make = "Toyota",
@@ -54,7 +59,7 @@ public class VehicleSearchServiceTests
     {
         // Arrange
         var fakeClient = new FakeOpenAIClientWrapper(new List<VehicleSearchResultDto>());
-        var service = new VehicleSearchService(fakeClient, _configurationMock.Object, _loggerMock.Object);
+        var service = new VehicleSearchService(fakeClient, _options, _loggerMock.Object);
         var criteria = new VehicleSearchCriteria
         {
             Make = "RareBrand",
@@ -74,7 +79,7 @@ public class VehicleSearchServiceTests
     {
         // Arrange
         var fakeClient = new FakeOpenAIClientWrapper();
-        var service = new VehicleSearchService(fakeClient, _configurationMock.Object, _loggerMock.Object);
+        var service = new VehicleSearchService(fakeClient, _options, _loggerMock.Object);
         var criteria = new VehicleSearchCriteria
         {
             Province = "ON"
@@ -93,11 +98,17 @@ public class VehicleSearchServiceTests
     {
         // Arrange
         var fakeClient = new FakeOpenAIClientWrapper();
-        var configWithoutDeployment = new Mock<IConfiguration>();
-        configWithoutDeployment.Setup(c => c["AzureOpenAI:DeploymentName"]).Returns((string?)null);
+        var optionsWithoutDeployment = Microsoft.Extensions.Options.Options.Create(new AzureOpenAIOptions
+        {
+            Endpoint = "https://test.openai.azure.com/",
+            ApiKey = "test-key",
+            DeploymentName = "" // Empty deployment name
+        });
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
-            new VehicleSearchService(fakeClient, configWithoutDeployment.Object, _loggerMock.Object));
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            new VehicleSearchService(fakeClient, optionsWithoutDeployment, _loggerMock.Object));
+        
+        Assert.Contains("DeploymentName", exception.Message);
     }
 }
