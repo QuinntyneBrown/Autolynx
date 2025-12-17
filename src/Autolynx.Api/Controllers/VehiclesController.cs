@@ -5,6 +5,7 @@ using Autolynx.Api.Hubs;
 using Autolynx.Core.Features.VehicleSearch;
 using Autolynx.Core.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,6 +13,7 @@ namespace Autolynx.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class VehiclesController : ControllerBase
 {
     private readonly IMediator _mediator;
