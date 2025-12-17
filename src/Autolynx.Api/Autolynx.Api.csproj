@@ -9,7 +9,11 @@
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Autolynx.Core\Autolynx.Core.csproj" />
   </ItemGroup>
 </Project>
