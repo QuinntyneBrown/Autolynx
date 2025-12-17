@@ -4,6 +4,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Autolynx.Api.Controllers;
+using Autolynx.Core.Features.Authentication;
 using Autolynx.Core.Models;
 using Autolynx.Core.Services;
 using Autolynx.Testing.Fakes;

@@ -1,13 +1,9 @@
 // Copyright (c) Quinntyne Brown. All Rights Reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Autolynx.Core.Options;
+using Autolynx.Core.Features.Authentication;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Autolynx.Api.Controllers;
 
@@ -15,14 +11,14 @@ namespace Autolynx.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly JwtOptions _jwtOptions;
+    private readonly IMediator _mediator;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
-        IOptions<JwtOptions> jwtOptions,
+        IMediator mediator,
         ILogger<AuthController> logger)
     {
-        _jwtOptions = jwtOptions?.Value ?? throw new ArgumentNullException(nameof(jwtOptions));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -36,38 +32,25 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         try
         {
-            // TODO: Replace with actual user authentication logic
-            // For now, this is a simple demonstration
-            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+            var command = new LoginCommand
             {
-                return Unauthorized(new { message = "Invalid credentials" });
-            }
+                Username = request.Username,
+                Password = request.Password
+            };
 
-            // Mock user validation - in production, validate against database
-            var roles = new List<string>();
-            if (request.Username == "admin")
-            {
-                roles.Add("Admin");
-            }
-            else
-            {
-                roles.Add("User");
-            }
-
-            var token = GenerateJwtToken(request.Username, roles);
+            var response = await _mediator.Send(command);
 
             _logger.LogInformation("User {Username} logged in successfully", request.Username);
 
-            return Ok(new LoginResponse
-            {
-                Token = token,
-                Username = request.Username,
-                Roles = roles
-            });
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid credentials" });
         }
         catch (Exception ex)
         {
@@ -75,45 +58,10 @@ public class AuthController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred during login");
         }
     }
-
-    private string GenerateJwtToken(string username, List<string> roles)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtOptions.Issuer,
-            audience: _jwtOptions.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
 }
 
 public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-}
-
-public class LoginResponse
-{
-    public string Token { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
-    public List<string> Roles { get; set; } = new List<string>();
 }
